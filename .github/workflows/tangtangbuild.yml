@@ -1,4 +1,4 @@
-name: (pstar) (LineageOS 20) (4.19.303) Build Kernel
+name: amechan_mtf
 on:
   watch:
     types: [started]
