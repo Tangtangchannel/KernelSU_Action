@@ -191,12 +191,6 @@ jobs:
         arch/arm64/configs/vendor/debugfs.config \
         >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
 
-    - name: Download Patches
-      run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        echo "------------ Download Patches --------------------------------------------------------------"
-        git clone https://github.com/AndroidAppsUsedByMyself/kernel_patches --depth=1
-
     - name: Import Docker Config
       if: env.IMPORT_DOCKER == 'true'
       run: |
@@ -365,35 +359,7 @@ jobs:
         echo "------------ Remove ANDROID_PARANOID_NETWORK -----------------------------------------------"
         scripts/config --file arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} -d ANDROID_PARANOID_NETWORK
 
-    - name: Remove Kernel Validation
-      if: env.Remove_Kernel_Validation == 'true'
-      run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        echo "------------ Patches for Remove Kernel Validation ------------------------------------------"
-        scripts/config --file arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} \
-        -e CONFIG_MODULE_FORCE_LOAD \
-        -d CONFIG_MODULE_SIG_FORCE
-        patch -p1 < kernel_patches/patches/${{ env.Kernel_Extra_Version }}/module.patch
-        #https://blog.xzr.moe/archives/236/
-        #disable CONFIG_MODVERSIONS is useless
 
-    - name: Remove Warning
-      if: env.Remove_Warning == 'true'
-      run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        echo "------------ Patches for remove warning ----------------------------------------------------"
-        patch -p1 < kernel_patches/patches/${{ env.Kernel_Extra_Version }}/nowarnings.patch
-        #scripts/config --file arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} -d CONFIG_CC_WERROR -e CONFIG_SECTION_MISMATCH_WARN_ONLY --set-val CONFIG_FRAME_WARN 4096
-
-    - name: Download source boot image
-      if: env.BUILD_BOOT_IMG == 'true'
-      run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace
-        wget -O boot-source.img ${{ env.SOURCE_BOOT_IMAGE }}
-        if [ -f boot-source.img ]; then
-            echo "FORMAT_MKBOOTING=$(echo `tools/unpack_bootimg.py --boot_img=boot-source.img --format mkbootimg`)" >> $GITHUB_ENV
-            echo "HAVE_SOURCE_BOOT_IMAGE=true" >> $GITHUB_ENV
-        fi
   
     - name: Setup KernelSU
       if: env.ENABLE_KERNELSU == 'true'
